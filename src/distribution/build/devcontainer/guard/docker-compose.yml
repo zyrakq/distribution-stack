@@ -1,0 +1,26 @@
+services:
+  distribution:
+    container_name: distribution
+    image: distribution/distribution:latest
+    restart: unless-stopped
+    volumes:
+      - distribution-hub:/var/lib/registry
+    networks:
+      - distribution-workspace-network
+    environment:
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_PATH: ${REGISTRY_AUTH_HTPASSWD_PATH:-/auth/htpasswd}
+      REGISTRY_AUTH_HTPASSWD_REALM: ${REGISTRY_AUTH_HTPASSWD_REALM:-"Distribution Realm"}
+    configs:
+      - source: htpasswd
+        target: ${REGISTRY_AUTH_HTPASSWD_PATH:-/auth/htpasswd}
+volumes:
+  distribution-hub:
+    name: distribution-hub
+networks:
+  distribution-workspace-network:
+    external: true
+configs:
+  htpasswd:
+    content: |-
+      ${DISTRIBUTION_USERNAME}:${DISTRIBUTION_PASSWORD_HASH}

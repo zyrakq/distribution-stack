@@ -1,0 +1,8 @@
+services:
+  distribution:
+    networks:
+      - distribution-workspace-network
+
+networks:
+  distribution-workspace-network:
+    external: true

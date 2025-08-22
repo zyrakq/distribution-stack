@@ -1,0 +1,6 @@
+[submodule "src/ssl-automation/letsencrypt-manager"]
+	path = src/ssl-automation/letsencrypt-manager
+	url = https://github.com/zyrakq/letsencrypt-manager-stack.git
+[submodule "src/ssl-automation/step-ca-manager"]
+	path = src/ssl-automation/step-ca-manager
+	url = https://github.com/zyrakq/step-ca-manager-stack.git

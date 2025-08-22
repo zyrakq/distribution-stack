@@ -1,0 +1,35 @@
+services:
+  distribution:
+    volumes:
+      - letsencrypt-certs:/certs
+      - letsencrypt-vhost:/vhost.d
+    environment:
+      VIRTUAL_PORT: ${VIRTUAL_PORT:-5000}
+      VIRTUAL_HOST: ${VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_HOST}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+      VIRTUAL_PROTO: ${VIRTUAL_PROTO:-https}
+      REGISTRY_HTTP_TLS_CERTIFICATE: ${REGISTRY_HTTP_TLS_CERTIFICATE:-/certs/${VIRTUAL_HOST}.crt}
+      REGISTRY_HTTP_TLS_KEY: ${REGISTRY_HTTP_TLS_KEY:-/certs/${VIRTUAL_HOST}.key}
+    configs:
+      - source: vhost
+        target: ${DISTRIBUTION_VHOST_PATH:-/vhost.d/${VIRTUAL_HOST}}
+    networks:
+      - letsencrypt-network
+
+volumes:
+  letsencrypt-certs:
+    external: true
+  letsencrypt-vhost:
+    external: true
+
+configs:
+  vhost:
+    content: |
+      client_max_body_size 0;
+      chunked_transfer_encoding on;
+
+networks:
+  letsencrypt-network:
+    name: letsencrypt-network
+    external: true

@@ -1,0 +1,11 @@
+services:
+  distribution:
+    container_name: distribution
+    image: distribution/distribution:latest
+    restart: unless-stopped
+    volumes:
+      - distribution-hub:/var/lib/registry
+
+volumes:
+  distribution-hub:
+    name: distribution-hub

@@ -1,0 +1,14 @@
+services:
+  distribution:
+    environment:
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_PATH: ${REGISTRY_AUTH_HTPASSWD_PATH:-/auth/htpasswd}
+      REGISTRY_AUTH_HTPASSWD_REALM: ${REGISTRY_AUTH_HTPASSWD_REALM:-"Distribution Realm"}
+    configs:
+      - source: htpasswd
+        target: ${REGISTRY_AUTH_HTPASSWD_PATH:-/auth/htpasswd}
+
+configs:
+  htpasswd:
+    content: |
+      ${DISTRIBUTION_USERNAME}:${DISTRIBUTION_PASSWORD_HASH}
