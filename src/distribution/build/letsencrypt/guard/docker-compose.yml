@@ -3,6 +3,11 @@ services:
     container_name: distribution
     image: distribution/distribution:latest
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 10m
+        max-file: 3
     volumes:
       - distribution-hub:/var/lib/registry
       - letsencrypt-certs:/certs
