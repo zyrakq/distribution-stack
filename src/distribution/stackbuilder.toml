@@ -1,0 +1,9 @@
+[paths]
+environments_path = "./environments"
+extensions_dirs = ["extensions"]
+
+[build]
+extensions = ["guard"]
+
+[build.environments]
+available = ["devcontainer", "forwarding", "letsencrypt", "step-ca"]
