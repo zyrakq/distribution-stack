@@ -32,7 +32,7 @@ cd build/letsencrypt/base/
 cd build/step-ca/base/
 
 # For development with authentication
-cd build/forwarding/guard/
+cd build/forwarding/htpasswd/
 ```
 
 ### 3. Configure Environment
@@ -77,20 +77,20 @@ curl http://localhost:5000/v2/<repository>/tags/list
 
 ### Extensions
 
-- **guard**: Authentication with username/password and API keys
+- **htpasswd**: Authentication with username/password and API keys
 
 ### Generated Combinations
 
 Each environment can be combined with any extension:
 
 - `devcontainer/base` - Development container environment
-- `devcontainer/guard` - Development container with authentication
+- `devcontainer/htpasswd` - Development container with authentication
 - `forwarding/base` - Development with port forwarding
-- `forwarding/guard` - Development with authentication
+- `forwarding/htpasswd` - Development with authentication
 - `letsencrypt/base` - Production with Let's Encrypt SSL
-- `letsencrypt/guard` - Production with Let's Encrypt + authentication
+- `letsencrypt/htpasswd` - Production with Let's Encrypt + authentication
 - `step-ca/base` - Production with Step CA SSL
-- `step-ca/guard` - Production with Step CA + authentication
+- `step-ca/htpasswd` - Production with Step CA + authentication
 
 ## 🔧 Environment Variables
 
@@ -114,7 +114,7 @@ Each environment can be combined with any extension:
 
 ⚠️ **Important**: When deploying with step-ca on a remote context, switch back to the main context before running `docker login` to ensure proper authentication.
 
-### Guard Configuration (Authentication)
+### Htpasswd Configuration (Authentication)
 
 - `API_KEY`: API key for registry access
 - `DISTRIBUTION_USERNAME`: Username for web interface
@@ -131,7 +131,7 @@ docker tag my-image:latest localhost:5000/my-image:latest
 # Push to registry (without authentication - base configurations)
 docker push localhost:5000/my-image:latest
 
-# With authentication (guard configurations)
+# With authentication (htpasswd configurations)
 docker login localhost:5000
 # Enter username and password when prompted
 docker push localhost:5000/my-image:latest

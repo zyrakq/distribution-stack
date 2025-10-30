@@ -3,7 +3,7 @@ environments_path = "./environments"
 extensions_dirs = ["extensions"]
 
 [build]
-extensions = ["guard"]
+extensions = ["htpasswd"]
 
 [build.environments]
 available = ["devcontainer", "forwarding", "letsencrypt", "step-ca"]
