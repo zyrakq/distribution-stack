@@ -1,31 +1,88 @@
 services:
   distribution:
     container_name: distribution
-    image: distribution/distribution:latest
+    image: ${IMAGE:-distribution/distribution:latest}
     restart: unless-stopped
+    environment:
+      CONFIG_DIR: ${CONFIG_DIR:-/configs}
+      CONFIG_FILE: ${CONFIG_FILE:-/etc/distribution/config.yml}
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_PATH: ${REGISTRY_AUTH_HTPASSWD_PATH:-/auth/.htpasswd}
+      REGISTRY_AUTH_HTPASSWD_REALM: ${REGISTRY_AUTH_HTPASSWD_REALM:-basic-realm}
     logging:
       driver: "json-file"
       options:
         max-size: 10m
         max-file: 3
+    configs:
+      - source: base-conf
+        target: ${DISTRIBUTION_BASE_CONF_PATH:-/configs/base-conf.yaml}
     volumes:
       - distribution-hub:/var/lib/registry
+      - distribution-access:/auth
     networks:
+      - distribution-network
       - distribution-workspace-network
-    environment:
-      REGISTRY_AUTH: htpasswd
-      REGISTRY_AUTH_HTPASSWD_PATH: ${REGISTRY_AUTH_HTPASSWD_PATH:-/auth/htpasswd}
-      REGISTRY_AUTH_HTPASSWD_REALM: ${REGISTRY_AUTH_HTPASSWD_REALM:-"Distribution Realm"}
+    depends_on:
+      - distribution-htpasswd-init
+  distribution-htpasswd-init:
+    container_name: distribution-htpasswd-init
+    image: alpine:latest
     configs:
       - source: htpasswd
-        target: ${REGISTRY_AUTH_HTPASSWD_PATH:-/auth/htpasswd}
+        target: /tmp/.htpasswd
+    volumes:
+      - distribution-access:/auth
+    # command: sleep infinityy
+    command: |
+      sh -c "
+        if [ ! -f /auth/.htpasswd ]; then
+          cp /tmp/.htpasswd /auth/.htpasswd
+        fi
+      "
+    networks:
+      - distribution-network
+configs:
+  base-conf:
+    content: |
+      version: 0.1
+      log:
+        accesslog:
+          disabled: ${REGISTRY_LOG_ACCESSLOG_DISABLED:-false}
+        level: ${REGISTRY_LOG_LEVEL:-warn}
+        formatter: ${REGISTRY_LOG_FORMATTER:-json}
+        fields:
+          service: ${REGISTRY_LOG_FIELDS_SERVICE:-distribution}
+          environment: ${REGISTRY_LOG_FIELDS_ENVIRONMENT:-production}
+      storage:
+          delete:
+            enabled: ${REGISTRY_STORAGE_DELETE_ENABLED:-true}
+          cache:
+              blobdescriptor: ${REGISTRY_STORAGE_CACHE_BLOBDESCRIPTOR:-inmemory}
+          filesystem:
+              rootdirectory: /var/lib/registry
+          maintenance:
+              uploadpurging:
+                  enabled: ${REGISTRY_STORAGE_MAINTENANCE_UPLOADPURGING_ENABLED:-false}
+      http:
+          addr: :5000
+          headers:
+              X-Content-Type-Options: [nosniff]
+      health:
+        storagedriver:
+          enabled: true
+          interval: 10s
+          threshold: 3
+  htpasswd:
+    content: |
+      ${DISTRIBUTION_USERNAME}:${DISTRIBUTION_PASSWORD_HASH}
 volumes:
   distribution-hub:
     name: distribution-hub
+  distribution-access:
+    name: distribution-access
 networks:
+  distribution-network:
+    name: distribution-network
   distribution-workspace-network:
     external: true
-configs:
-  htpasswd:
-    content: |-
-      ${DISTRIBUTION_USERNAME}:${DISTRIBUTION_PASSWORD_HASH}

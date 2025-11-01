@@ -1,0 +1,28 @@
+services:
+  distribution:
+    image: ${IMAGE:-localhost/distribution:2.8.3}
+    configs:
+      - source: imagelist-conf
+        target: ${DISTRIBUTION_IMAGELIST_CONF_PATH:-/configs/imagelist-conf.yaml}
+
+configs:
+  imagelist-conf:
+    content: |
+      version: 0.1
+      notifications:
+        events:
+          includereferences: ${REGISTRY_NOTIFICATIONS_EVENTS_INCLUDEREFERENCES:-true}
+        endpoints:
+          - name: ${REGISTRY_ENDPOINTS_IMAGELIST_NAME:-ra-listener}
+            disabled: ${REGISTRY_ENDPOINTS_IMAGELIST_DISABLED:-false}
+            url: ${REGISTRY_ENDPOINTS_IMAGELIST_URL}
+            headers:
+              Authorization: [${REGISTRY_NOTIFICATIONS_ENDPOINTS_IMAGELIST_HEADERS_AUTHORIZATION}]
+            timeout: ${REGISTRY_ENDPOINTS_IMAGELIST_TIMEOUT:-1s}
+            threshold: ${REGISTRY_ENDPOINTS_IMAGELIST_THRESHOLD:-5}
+            backoff: ${REGISTRY_ENDPOINTS_IMAGELIST_BACKOFF:-3s}
+            ignoredmediatypes:
+              - ${REGISTRY_ENDPOINTS_IMAGELIST_IGNOREDMEDIATYPES:-application/octet-stream}
+            ignore:
+              mediatypes:
+                - ${REGISTRY_ENDPOINTS_IMAGELIST_IGNORE_MEDIATYPES:-application/octet-stream}

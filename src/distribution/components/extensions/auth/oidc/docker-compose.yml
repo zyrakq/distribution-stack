@@ -1,0 +1,14 @@
+services:
+  distribution:
+    image: ${IMAGE:-distribution/distribution:2.8.3}
+    environment:
+      REGISTRY_AUTH_TOKEN_REALM: ${REGISTRY_AUTH_TOKEN_REALM}
+      REGISTRY_AUTH_TOKEN_SERVICE: ${REGISTRY_AUTH_TOKEN_SERVICE}
+      REGISTRY_AUTH_TOKEN_ISSUER: ${REGISTRY_AUTH_TOKEN_ISSUER}
+      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: ${REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE:-/oidc/certs/cert.crt}
+    volumes:
+      - distribution-oidc-certs:/oidc/certs
+
+volumes:
+  distribution-oidc-certs:
+    name: ${DISTRIBUTION_CERTS:-distribution-oidc-certs}

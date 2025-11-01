@@ -1,9 +1,30 @@
 [paths]
 environments_path = "./environments"
-extensions_dirs = ["extensions"]
+extensions_dirs = ["extensions/auth", "extensions/notifications", "extensions"]
 
 [build]
-extensions = ["htpasswd"]
+extensions = ["htpasswd", "oidc", "imagelist-conf", "step-ca-trust"]
+
+[build.combos]
+htpasswd-hub = ["htpasswd", "imagelist-conf"]
+oidc-hub = ["oidc", "imagelist-conf"]
+oidc-hub-trust = ["oidc", "imagelist-conf", "step-ca-trust"]
 
 [build.environments]
 available = ["devcontainer", "forwarding", "letsencrypt", "step-ca"]
+
+[build.environments.devcontainer]
+extensions = ["htpasswd"]
+combos = ["htpasswd-hub", "oidc-hub"]
+
+[build.environments.forwarding]
+extensions = ["htpasswd"]
+combos = ["htpasswd-hub", "oidc-hub"]
+
+[build.environments.letsencrypt]
+extensions = ["htpasswd"]
+combos = ["htpasswd-hub", "oidc-hub"]
+
+[build.environments.step-ca]
+extensions = ["htpasswd"]
+combos = ["htpasswd-hub", "oidc-hub-trust"]

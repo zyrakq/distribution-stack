@@ -1,7 +1,7 @@
 services:
   distribution:
     container_name: distribution
-    image: ${IMAGE:-distribution/distribution:latest}
+    image: ${IMAGE:-localhost/distribution:2.8.3}
     restart: unless-stopped
     environment:
       CONFIG_DIR: ${CONFIG_DIR:-/configs}
@@ -13,9 +13,10 @@ services:
       VIRTUAL_PROTO: ${VIRTUAL_PROTO:-https}
       REGISTRY_HTTP_TLS_CERTIFICATE: ${REGISTRY_HTTP_TLS_CERTIFICATE:-/certs/${VIRTUAL_HOST}.crt}
       REGISTRY_HTTP_TLS_KEY: ${REGISTRY_HTTP_TLS_KEY:-/certs/${VIRTUAL_HOST}.key}
-      REGISTRY_AUTH: htpasswd
-      REGISTRY_AUTH_HTPASSWD_PATH: ${REGISTRY_AUTH_HTPASSWD_PATH:-/auth/.htpasswd}
-      REGISTRY_AUTH_HTPASSWD_REALM: ${REGISTRY_AUTH_HTPASSWD_REALM:-basic-realm}
+      REGISTRY_AUTH_TOKEN_REALM: ${REGISTRY_AUTH_TOKEN_REALM}
+      REGISTRY_AUTH_TOKEN_SERVICE: ${REGISTRY_AUTH_TOKEN_SERVICE}
+      REGISTRY_AUTH_TOKEN_ISSUER: ${REGISTRY_AUTH_TOKEN_ISSUER}
+      REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: ${REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE:-/oidc/certs/cert.crt}
     logging:
       driver: "json-file"
       options:
@@ -26,33 +27,16 @@ services:
         target: ${DISTRIBUTION_BASE_CONF_PATH:-/configs/base-conf.yaml}
       - source: vhost
         target: ${DISTRIBUTION_VHOST_PATH:-/vhost.d/${VIRTUAL_HOST}}
+      - source: imagelist-conf
+        target: ${DISTRIBUTION_IMAGELIST_CONF_PATH:-/configs/imagelist-conf.yaml}
     volumes:
       - distribution-hub:/var/lib/registry
-      - step-ca-certs:/certs
-      - step-ca-vhost:/vhost.d
-      - distribution-access:/auth
+      - letsencrypt-certs:/certs
+      - letsencrypt-vhost:/vhost.d
+      - distribution-oidc-certs:/oidc/certs
     networks:
       - distribution-network
-      - step-ca-network
-    depends_on:
-      - distribution-htpasswd-init
-  distribution-htpasswd-init:
-    container_name: distribution-htpasswd-init
-    image: alpine:latest
-    configs:
-      - source: htpasswd
-        target: /tmp/.htpasswd
-    volumes:
-      - distribution-access:/auth
-    # command: sleep infinityy
-    command: |
-      sh -c "
-        if [ ! -f /auth/.htpasswd ]; then
-          cp /tmp/.htpasswd /auth/.htpasswd
-        fi
-      "
-    networks:
-      - distribution-network
+      - letsencrypt-network
 configs:
   base-conf:
     content: |
@@ -88,21 +72,38 @@ configs:
     content: |
       client_max_body_size 0;
       chunked_transfer_encoding on;
-  htpasswd:
-    content: |
-      ${DISTRIBUTION_USERNAME}:${DISTRIBUTION_PASSWORD_HASH}
+  imagelist-conf:
+    content: |-
+      version: 0.1
+      notifications:
+        events:
+          includereferences: ${REGISTRY_NOTIFICATIONS_EVENTS_INCLUDEREFERENCES:-true}
+        endpoints:
+          - name: ${REGISTRY_ENDPOINTS_IMAGELIST_NAME:-ra-listener}
+            disabled: ${REGISTRY_ENDPOINTS_IMAGELIST_DISABLED:-false}
+            url: ${REGISTRY_ENDPOINTS_IMAGELIST_URL}
+            headers:
+              Authorization: [${REGISTRY_NOTIFICATIONS_ENDPOINTS_IMAGELIST_HEADERS_AUTHORIZATION}]
+            timeout: ${REGISTRY_ENDPOINTS_IMAGELIST_TIMEOUT:-1s}
+            threshold: ${REGISTRY_ENDPOINTS_IMAGELIST_THRESHOLD:-5}
+            backoff: ${REGISTRY_ENDPOINTS_IMAGELIST_BACKOFF:-3s}
+            ignoredmediatypes:
+              - ${REGISTRY_ENDPOINTS_IMAGELIST_IGNOREDMEDIATYPES:-application/octet-stream}
+            ignore:
+              mediatypes:
+                - ${REGISTRY_ENDPOINTS_IMAGELIST_IGNORE_MEDIATYPES:-application/octet-stream}
 volumes:
   distribution-hub:
     name: distribution-hub
-  step-ca-certs:
+  letsencrypt-certs:
     external: true
-  step-ca-vhost:
+  letsencrypt-vhost:
     external: true
-  distribution-access:
-    name: distribution-access
+  distribution-oidc-certs:
+    name: ${DISTRIBUTION_CERTS:-distribution-oidc-certs}
 networks:
   distribution-network:
     name: distribution-network
-  step-ca-network:
-    name: step-ca-network
+  letsencrypt-network:
+    name: letsencrypt-network
     external: true

@@ -1,0 +1,7 @@
+services:
+  distribution:
+    environment:
+      STEP_CA_TRUST: ${STEP_CA_TRUST:-true}
+      STEP_CA_TRUST_RESTART: ${STEP_CA_TRUST_RESTART:-true}
+      # REQUESTS_CA_BUNDLE: ${REQUESTS_CA_BUNDLE:-/usr/local/share/ca-certificates/step-ca-bundle.crt}
+      # SSL_CERT_FILE: ${SSL_CERT_FILE:-/usr/local/share/ca-certificates/step-ca-bundle.crt}

@@ -31,8 +31,11 @@ cd build/letsencrypt/base/
 # For production with Step CA SSL
 cd build/step-ca/base/
 
-# For development with authentication
+# For development with htpasswd authentication
 cd build/forwarding/htpasswd/
+
+# For development with OIDC authentication and notifications
+cd build/forwarding/oidc-hub/
 ```
 
 ### 3. Configure Environment
@@ -77,20 +80,35 @@ curl http://localhost:5000/v2/<repository>/tags/list
 
 ### Extensions
 
-- **htpasswd**: Authentication with username/password and API keys
+- **htpasswd**: HTTP Basic authentication with username/password
+- **oidc**: OIDC/OAuth 2.0 token-based authentication
+- **notification**: Event notifications to registry-admin interface
+
+### Extension Combinations
+
+- **htpasswd-hub**: Htpasswd authentication + notifications
+- **oidc-hub**: OIDC authentication + notifications
 
 ### Generated Combinations
 
-Each environment can be combined with any extension:
+Each environment can be combined with extensions:
 
 - `devcontainer/base` - Development container environment
-- `devcontainer/htpasswd` - Development container with authentication
+- `devcontainer/htpasswd` - Development container with htpasswd auth
+- `devcontainer/htpasswd-hub` - Development container with htpasswd auth + notifications
+- `devcontainer/oidc-hub` - Development container with OIDC auth + notifications
 - `forwarding/base` - Development with port forwarding
-- `forwarding/htpasswd` - Development with authentication
+- `forwarding/htpasswd` - Development with htpasswd auth
+- `forwarding/htpasswd-hub` - Development with htpasswd auth + notifications
+- `forwarding/oidc-hub` - Development with OIDC auth + notifications
 - `letsencrypt/base` - Production with Let's Encrypt SSL
-- `letsencrypt/htpasswd` - Production with Let's Encrypt + authentication
+- `letsencrypt/htpasswd` - Production with Let's Encrypt + htpasswd auth
+- `letsencrypt/htpasswd-hub` - Production with Let's Encrypt + htpasswd auth + notifications
+- `letsencrypt/oidc-hub` - Production with Let's Encrypt + OIDC auth + notifications
 - `step-ca/base` - Production with Step CA SSL
-- `step-ca/htpasswd` - Production with Step CA + authentication
+- `step-ca/htpasswd` - Production with Step CA + htpasswd auth
+- `step-ca/htpasswd-hub` - Production with Step CA + htpasswd auth + notifications
+- `step-ca/oidc-hub` - Production with Step CA + OIDC auth + notifications
 
 ## 🔧 Environment Variables
 
@@ -114,11 +132,29 @@ Each environment can be combined with any extension:
 
 ⚠️ **Important**: When deploying with step-ca on a remote context, switch back to the main context before running `docker login` to ensure proper authentication.
 
-### Htpasswd Configuration (Authentication)
+### Htpasswd Configuration
 
-- `API_KEY`: API key for registry access
-- `DISTRIBUTION_USERNAME`: Username for web interface
-- `DISTRIBUTION_PASSWORD`: Password for web interface
+- `REGISTRY_AUTH_HTPASSWD_PATH`: Path to htpasswd file (default: /auth/htpasswd)
+- `REGISTRY_AUTH_HTPASSWD_REALM`: Authentication realm (default: basic-realm)
+- `DISTRIBUTION_USERNAME`: Username for authentication
+- `DISTRIBUTION_PASSWORD_HASH`: Bcrypt password hash
+
+### OIDC Configuration
+
+- `REGISTRY_AUTH_TOKEN_REALM`: Token authentication endpoint URL
+- `REGISTRY_AUTH_TOKEN_SERVICE`: Service identifier for tokens
+- `REGISTRY_AUTH_TOKEN_ISSUER`: Token issuer identifier
+- `REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE`: Path to root certificate bundle (default: /oidc/certs/cert.crt)
+- `DISTRIBUTION_CERTS`: External volume name for certificates
+
+### Notification Configuration
+
+- `REGISTRY_ENDPOINTS_0_URL`: Webhook URL for registry events
+- `REGISTRY_NOTIFICATIONS_ENDPOINTS_0_HEADERS_AUTHORIZATION_0`: Authorization header for webhook
+- `REGISTRY_ENDPOINTS_0_NAME`: Endpoint name (default: ra-listener)
+- `REGISTRY_ENDPOINTS_0_TIMEOUT`: Request timeout (default: 1s)
+- `REGISTRY_ENDPOINTS_0_THRESHOLD`: Retry threshold (default: 5)
+- `REGISTRY_ENDPOINTS_0_BACKOFF`: Backoff duration (default: 3s)
 
 ## 🐳 Using Docker Registry
 
@@ -158,8 +194,17 @@ curl http://localhost:5000/v2/my-image/tags/list
 
 ### Project Structure
 
-- **`components/`** - Source compose components (base, environments, extensions)
+- **`components/`** - Source compose components
+  - `base/` - Base configuration
+  - `environments/` - Environment-specific configs (devcontainer, forwarding, letsencrypt, step-ca)
+  - `extensions/` - Optional extensions
+    - `auth/` - Authentication methods (htpasswd, oidc)
+    - `notification/` - Event notification system
 - **`build/`** - Generated configurations (auto-generated, ready to deploy)
+  - `devcontainer/` - Development container builds
+  - `forwarding/` - Port forwarding builds
+  - `letsencrypt/` - Let's Encrypt SSL builds
+  - `step-ca/` - Step CA SSL builds
 - **`stackbuilder.toml`** - Build configuration file
 
 ### Adding New Environments
