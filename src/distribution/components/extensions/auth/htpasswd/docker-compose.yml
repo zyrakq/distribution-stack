@@ -1,29 +1,12 @@
 services:
-  distribution-htpasswd-init:
-    container_name: distribution-htpasswd-init
-    image: alpine:latest
-    configs:
-      - source: htpasswd
-        target: /tmp/.htpasswd
-    volumes:
-      - distribution-access:/auth
-    # command: sleep infinityy
-    command: |
-      sh -c "
-        if [ ! -f /auth/.htpasswd ]; then
-          cp /tmp/.htpasswd /auth/.htpasswd
-        fi
-      "
-    networks:
-      - distribution-network
-  
   distribution:
     environment:
       REGISTRY_AUTH: htpasswd
       REGISTRY_AUTH_HTPASSWD_PATH: ${REGISTRY_AUTH_HTPASSWD_PATH:-/auth/.htpasswd}
       REGISTRY_AUTH_HTPASSWD_REALM: ${REGISTRY_AUTH_HTPASSWD_REALM:-basic-realm}
-    depends_on:
-      - distribution-htpasswd-init
+    configs:
+      - source: htpasswd
+        target: /tmp/.htpasswd
     volumes:
       - distribution-access:/auth
 

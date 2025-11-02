@@ -17,6 +17,8 @@ services:
     configs:
       - source: base-conf
         target: ${DISTRIBUTION_BASE_CONF_PATH:-/configs/base-conf.yaml}
+      - source: htpasswd
+        target: /tmp/.htpasswd
       - source: imagelist-conf
         target: ${DISTRIBUTION_IMAGELIST_CONF_PATH:-/configs/imagelist-conf.yaml}
     volumes:
@@ -26,25 +28,6 @@ services:
       - distribution-network
     ports:
       - 5000:5000
-    depends_on:
-      - distribution-htpasswd-init
-  distribution-htpasswd-init:
-    container_name: distribution-htpasswd-init
-    image: alpine:latest
-    configs:
-      - source: htpasswd
-        target: /tmp/.htpasswd
-    volumes:
-      - distribution-access:/auth
-    # command: sleep infinityy
-    command: |
-      sh -c "
-        if [ ! -f /auth/.htpasswd ]; then
-          cp /tmp/.htpasswd /auth/.htpasswd
-        fi
-      "
-    networks:
-      - distribution-network
 configs:
   base-conf:
     content: |

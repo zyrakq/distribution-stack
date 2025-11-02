@@ -8,9 +8,11 @@ RUN apk add --no-cache yq bash
 ENV CONFIG_DIR=/configs
 ENV CONFIG_FILE=/etc/distribution/config.yml
 ENV ENABLE_CONFIG_MERGE=true
+ENV HTPASSWD_SOURCE=/tmp/.htpasswd
+ENV HTPASSWD_DEST=/auth/.htpasswd
 
 # Create directory for configs
-RUN mkdir -p ${CONFIG_DIR}
+RUN mkdir -p ${CONFIG_DIR} /auth
 
 # Copy entrypoint script
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh

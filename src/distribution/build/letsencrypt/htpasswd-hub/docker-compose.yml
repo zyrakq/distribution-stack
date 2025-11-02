@@ -26,6 +26,8 @@ services:
         target: ${DISTRIBUTION_BASE_CONF_PATH:-/configs/base-conf.yaml}
       - source: vhost
         target: ${DISTRIBUTION_VHOST_PATH:-/vhost.d/${VIRTUAL_HOST}}
+      - source: htpasswd
+        target: /tmp/.htpasswd
       - source: imagelist-conf
         target: ${DISTRIBUTION_IMAGELIST_CONF_PATH:-/configs/imagelist-conf.yaml}
     volumes:
@@ -36,25 +38,6 @@ services:
     networks:
       - distribution-network
       - letsencrypt-network
-    depends_on:
-      - distribution-htpasswd-init
-  distribution-htpasswd-init:
-    container_name: distribution-htpasswd-init
-    image: alpine:latest
-    configs:
-      - source: htpasswd
-        target: /tmp/.htpasswd
-    volumes:
-      - distribution-access:/auth
-    # command: sleep infinityy
-    command: |
-      sh -c "
-        if [ ! -f /auth/.htpasswd ]; then
-          cp /tmp/.htpasswd /auth/.htpasswd
-        fi
-      "
-    networks:
-      - distribution-network
 configs:
   base-conf:
     content: |
