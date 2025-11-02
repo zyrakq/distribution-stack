@@ -1,6 +1,10 @@
 # 🐳 Docker Distribution Service
 
-A modular Docker Compose configuration system for Docker Distribution (Docker Registry) with support for multiple environments and extensions.
+Docker Registry v2.8.3 with modular configuration system supporting multiple environments and extensions.
+
+## 📦 Related Projects
+
+Works with [registry-admin](../clients/registry-admin/) for web interface and SSO. Deploy distribution **first**, then registry-admin.
 
 ## 🚀 Quick Start
 
@@ -80,14 +84,16 @@ curl http://localhost:5000/v2/<repository>/tags/list
 
 ### Extensions
 
-- **htpasswd**: HTTP Basic authentication with username/password
-- **oidc**: OIDC/OAuth 2.0 token-based authentication
-- **notification**: Event notifications to registry-admin interface
+- **htpasswd**: HTTP Basic authentication
+- **oidc**: OIDC/OAuth 2.0 authentication (requires registry-admin)
+- **imagelist-conf**: Webhook notifications to registry-admin
+- **step-ca-trust**: Trust Step CA certificates
 
 ### Extension Combinations
 
-- **htpasswd-hub**: Htpasswd authentication + notifications
-- **oidc-hub**: OIDC authentication + notifications
+- **htpasswd-hub**: Htpasswd + notifications
+- **oidc-hub**: OIDC + notifications
+- **oidc-hub-trust**: OIDC + notifications + Step CA trust (step-ca environment only)
 
 ### Generated Combinations
 
@@ -108,7 +114,7 @@ Each environment can be combined with extensions:
 - `step-ca/base` - Production with Step CA SSL
 - `step-ca/htpasswd` - Production with Step CA + htpasswd auth
 - `step-ca/htpasswd-hub` - Production with Step CA + htpasswd auth + notifications
-- `step-ca/oidc-hub` - Production with Step CA + OIDC auth + notifications
+- `step-ca/oidc-hub-trust` - Production with Step CA + OIDC auth + notifications + CA trust
 
 ## 🔧 Environment Variables
 
@@ -141,18 +147,20 @@ Each environment can be combined with extensions:
 
 ### OIDC Configuration
 
-- `REGISTRY_AUTH_TOKEN_REALM`: Token authentication endpoint URL
-- `REGISTRY_AUTH_TOKEN_SERVICE`: Service identifier for tokens
-- `REGISTRY_AUTH_TOKEN_ISSUER`: Token issuer identifier
-- `REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE`: Path to root certificate bundle (default: /oidc/certs/cert.crt)
-- `DISTRIBUTION_CERTS`: External volume name for certificates
+- `REGISTRY_AUTH_TOKEN_REALM`: Token endpoint URL
+- `REGISTRY_AUTH_TOKEN_SERVICE`: Service identifier
+- `REGISTRY_AUTH_TOKEN_ISSUER`: Token issuer
+- `REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE`: Root certificate path (default: /oidc/certs/cert.crt)
+- `DISTRIBUTION_CERTS`: External volume for certificates
 
-### Notification Configuration
+⚠️ **Version**: Must use v2.8.3 for OIDC compatibility with registry-admin
 
-- `REGISTRY_ENDPOINTS_0_URL`: Webhook URL for registry events
-- `REGISTRY_NOTIFICATIONS_ENDPOINTS_0_HEADERS_AUTHORIZATION_0`: Authorization header for webhook
+### Notification Configuration (imagelist-conf)
+
+- `REGISTRY_ENDPOINTS_0_URL`: Webhook URL for registry-admin
+- `REGISTRY_NOTIFICATIONS_ENDPOINTS_0_HEADERS_AUTHORIZATION_0`: Authorization header
 - `REGISTRY_ENDPOINTS_0_NAME`: Endpoint name (default: ra-listener)
-- `REGISTRY_ENDPOINTS_0_TIMEOUT`: Request timeout (default: 1s)
+- `REGISTRY_ENDPOINTS_0_TIMEOUT`: Timeout (default: 1s)
 - `REGISTRY_ENDPOINTS_0_THRESHOLD`: Retry threshold (default: 5)
 - `REGISTRY_ENDPOINTS_0_BACKOFF`: Backoff duration (default: 3s)
 
@@ -196,16 +204,27 @@ curl http://localhost:5000/v2/my-image/tags/list
 
 - **`components/`** - Source compose components
   - `base/` - Base configuration
-  - `environments/` - Environment-specific configs (devcontainer, forwarding, letsencrypt, step-ca)
+  - `environments/` - Environment configs (devcontainer, forwarding, letsencrypt, step-ca)
   - `extensions/` - Optional extensions
-    - `auth/` - Authentication methods (htpasswd, oidc)
-    - `notification/` - Event notification system
-- **`build/`** - Generated configurations (auto-generated, ready to deploy)
-  - `devcontainer/` - Development container builds
-  - `forwarding/` - Port forwarding builds
-  - `letsencrypt/` - Let's Encrypt SSL builds
-  - `step-ca/` - Step CA SSL builds
-- **`stackbuilder.toml`** - Build configuration file
+    - `auth/` - Authentication (htpasswd, oidc)
+    - `notifications/` - Webhook notifications (imagelist-conf)
+    - `step-ca-trust/` - Step CA certificate trust
+- **`build/`** - Generated configurations (auto-generated)
+- **`image/`** - Custom Distribution image with dynamic configuration
+- **`stackbuilder.toml`** - Build configuration
+
+### Custom Distribution Image
+
+The project uses a custom Distribution image built in [`image/`](image/) directory that enables dynamic configuration assembly through inline configs in docker-compose files.
+
+**Key Features:**
+
+- **Dynamic Config Merging**: Combines multiple YAML configuration files from inline configs in docker-compose
+- **Alphabetical Processing**: Merges configs in alphabetical order for predictable results
+- **Volume-Based Assembly**: Configs are mounted as Docker configs and merged after container startup into a shared volume
+- **Flexible Configuration**: Supports both single config files and multi-file merging
+
+See [`image/README.md`](image/README.md) for detailed documentation on how it works and build instructions.
 
 ### Adding New Environments
 
@@ -238,21 +257,25 @@ curl http://localhost:5000/v2/my-image/tags/list
 
 **Build Issues:**
 
-- Ensure stackbuilder is installed: <https://github.com/zyrakq/stackbuilder>
-- Check component file syntax
-- Verify all required files exist
+- Install stackbuilder: <https://github.com/zyrakq/stackbuilder>
+- Verify component file syntax
 
-**Image Push/Pull Issues:**
+**Registry Issues:**
 
 - Check authentication credentials
-- Ensure registry is running and accessible
-- Review container logs: `docker logs distribution`
-- Verify network connectivity and firewall rules
+- Review logs: `docker logs distribution`
+- Verify network connectivity
 
 **SSL Issues:**
 
 - **Let's Encrypt**: Verify domain DNS and letsencrypt-manager
-- **Step CA**: Check step-ca-manager and virtual network config
+- **Step CA**: Check step-ca-manager and virtual network
+
+**Integration with Registry Admin:**
+
+- **OIDC startup**: Distribution restarts ~20s during initial certificate generation (normal)
+- **Htpasswd**: Verify htpasswd file is shared via volume
+- **Webhooks**: Check `imagelist-conf` extension configured with correct URL
 
 ## 📝 Notes
 

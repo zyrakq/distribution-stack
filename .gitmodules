@@ -4,3 +4,6 @@
 [submodule "src/ssl-automation/step-ca-manager"]
 	path = src/ssl-automation/step-ca-manager
 	url = https://github.com/zyrakq/step-ca-manager-stack.git
+[submodule "src/clients/registry-admin"]
+	path = src/clients/registry-admin
+	url = https://github.com/zyrakq/registry-admin-stack.git
