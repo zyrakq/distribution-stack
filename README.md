@@ -12,6 +12,8 @@ Docker Registry v2.8.3 with modular configuration system supporting multiple aut
 
 Web interface and OIDC/SSO provider for Docker Distribution. Provides user management and image catalog browsing.
 
+⚠️ **Access Control Limitations**: Despite advertised support for groups, roles, and permissions, registry-admin currently only provides individual image-level access control. There is no grouping of images, no ownership assignment, and no role-based access management. Access control is limited to granting/restricting individual users to specific already-uploaded images.
+
 ### 🔐 SSL Automation
 
 #### [🔒 Let's Encrypt Manager](src/ssl-automation/letsencrypt-manager)
