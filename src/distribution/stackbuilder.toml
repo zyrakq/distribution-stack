@@ -3,28 +3,30 @@ environments_path = "./environments"
 extensions_dirs = ["extensions/auth", "extensions/notifications", "extensions"]
 
 [build]
-extensions = ["htpasswd", "oidc", "imagelist-conf", "step-ca-trust"]
+skip_base_generation = true
+extensions = ["proxy", "htpasswd", "oidc", "imagelist-conf", "step-ca-trust"]
 
 [build.combos]
-htpasswd-hub = ["htpasswd", "imagelist-conf"]
-oidc-hub = ["oidc", "imagelist-conf"]
-oidc-hub-trust = ["oidc", "imagelist-conf", "step-ca-trust"]
+basic = ["proxy", "htpasswd"]
+basic-hub = ["proxy", "htpasswd", "imagelist-conf"]
+oidc-hub = ["proxy", "oidc", "imagelist-conf"]
+oidc-hub-trust = ["proxy", "oidc", "imagelist-conf", "step-ca-trust"]
 
 [build.environments]
 available = ["devcontainer", "forwarding", "letsencrypt", "step-ca"]
 
 [build.environments.devcontainer]
-extensions = ["htpasswd"]
-combos = ["htpasswd-hub", "oidc-hub"]
+extensions = []
+combos = ["basic"]
 
 [build.environments.forwarding]
-extensions = ["htpasswd"]
-combos = ["htpasswd-hub", "oidc-hub"]
+extensions = []
+combos = ["basic"]
 
 [build.environments.letsencrypt]
-extensions = ["htpasswd"]
-combos = ["htpasswd-hub", "oidc-hub"]
+extensions = []
+combos = ["basic"]
 
 [build.environments.step-ca]
-extensions = ["htpasswd"]
-combos = ["htpasswd-hub", "oidc-hub-trust"]
+extensions = []
+combos = ["basic", "basic-hub", "oidc-hub-trust"]
