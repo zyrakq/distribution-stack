@@ -7,5 +7,11 @@
     "LICENSE-APACHE": "plaintext",
     "LICENSE-MIT": "plaintext",
     ".gitmessage": "plaintext"
+  },
+  "[dockerfile]": {
+    "editor.formatOnSave": false
+  },
+  "files.exclude": {
+    "**/.git": false
   }
 }
