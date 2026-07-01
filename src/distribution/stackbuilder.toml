@@ -13,11 +13,7 @@ oidc-hub = ["proxy", "oidc", "imagelist-conf"]
 oidc-hub-trust = ["proxy", "oidc", "imagelist-conf", "step-ca-trust"]
 
 [build.environments]
-available = ["devcontainer", "forwarding", "letsencrypt", "step-ca"]
-
-[build.environments.devcontainer]
-extensions = []
-combos = ["basic"]
+available = ["forwarding", "letsencrypt", "step-ca"]
 
 [build.environments.forwarding]
 extensions = []

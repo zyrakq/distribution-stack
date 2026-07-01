@@ -1,16 +1,19 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: ${LOG_MAX_SIZE:-10m}
+    max-file: ${LOG_MAX_FILE:-3}
+    compress: ${LOG_COMPRESS:-true}
+
 services:
   distribution:
     container_name: distribution
     image: ${IMAGE:-distribution/distribution:latest}
     restart: unless-stopped
+    logging: *default-logging
     environment:
       CONFIG_DIR: ${CONFIG_DIR:-/configs}
       CONFIG_FILE: ${CONFIG_FILE:-/etc/distribution/config.yml}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: 10m
-        max-file: 3
     configs:
       - source: base-conf
         target: ${DISTRIBUTION_BASE_CONF_PATH:-/configs/base-conf.yaml}

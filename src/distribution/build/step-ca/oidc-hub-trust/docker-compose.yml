@@ -1,8 +1,15 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: ${LOG_MAX_SIZE:-10m}
+    max-file: ${LOG_MAX_FILE:-3}
+    compress: ${LOG_COMPRESS:-true}
 services:
   distribution:
     container_name: distribution
     image: ${IMAGE:-localhost/distribution:2.8.3}
     restart: unless-stopped
+    logging: *default-logging
     environment:
       CONFIG_DIR: ${CONFIG_DIR:-/configs}
       CONFIG_FILE: ${CONFIG_FILE:-/etc/distribution/config.yml}
@@ -25,11 +32,6 @@ services:
       STEP_CA_TRUST_RESTART: ${STEP_CA_TRUST_RESTART:-true}
       # REQUESTS_CA_BUNDLE: ${REQUESTS_CA_BUNDLE:-/usr/local/share/ca-certificates/step-ca-bundle.crt}
       # SSL_CERT_FILE: ${SSL_CERT_FILE:-/usr/local/share/ca-certificates/step-ca-bundle.crt}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: 10m
-        max-file: 3
     configs:
       - source: base-conf
         target: ${DISTRIBUTION_BASE_CONF_PATH:-/configs/base-conf.yaml}

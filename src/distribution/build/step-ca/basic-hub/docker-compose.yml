@@ -1,8 +1,15 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: ${LOG_MAX_SIZE:-10m}
+    max-file: ${LOG_MAX_FILE:-3}
+    compress: ${LOG_COMPRESS:-true}
 services:
   distribution:
     container_name: distribution
     image: ${IMAGE:-localhost/distribution:2.8.3}
     restart: unless-stopped
+    logging: *default-logging
     environment:
       CONFIG_DIR: ${CONFIG_DIR:-/configs}
       CONFIG_FILE: ${CONFIG_FILE:-/etc/distribution/config.yml}
@@ -20,11 +27,6 @@ services:
       REGISTRY_AUTH: htpasswd
       REGISTRY_AUTH_HTPASSWD_PATH: ${REGISTRY_AUTH_HTPASSWD_PATH:-/auth/.htpasswd}
       REGISTRY_AUTH_HTPASSWD_REALM: ${REGISTRY_AUTH_HTPASSWD_REALM:-basic-realm}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: 10m
-        max-file: 3
     configs:
       - source: base-conf
         target: ${DISTRIBUTION_BASE_CONF_PATH:-/configs/base-conf.yaml}
