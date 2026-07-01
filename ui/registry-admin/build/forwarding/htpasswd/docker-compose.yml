@@ -1,0 +1,42 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: ${LOG_MAX_SIZE:-10m}
+    max-file: ${LOG_MAX_FILE:-3}
+    compress: ${LOG_COMPRESS:-true}
+services:
+  registry-admin:
+    container_name: registry-admin
+    image: ${IMAGE:-localhost/registry-admin:latest}
+    restart: unless-stopped
+    logging: *default-logging
+    # command: sleep infinity
+    environment:
+      APP_UID: ${APP_UID:-1001}
+      RA_DEBUG: ${RA_DEBUG:-false}
+      RA_REGISTRY_HOSTNAME: ${RA_REGISTRY_HOSTNAME:-0.0.0.0}
+      RA_REGISTRY_HOST: ${RA_REGISTRY_HOST}
+      RA_REGISTRY_PORT: ${RA_REGISTRY_PORT}
+      RA_AUTH_TOKEN_SECRET: ${RA_AUTH_TOKEN_SECRET}
+      RA_STORE_DB_TYPE: ${RA_STORE_DB_TYPE:-embed}
+      RA_STORE_ADMIN_PASSWORD: ${RA_STORE_ADMIN_PASSWORD}
+      RA_STORE_EMBED_DB_PATH: ${RA_STORE_EMBED_DB_PATH:-/app/data/store.db}
+      RA_REGISTRY_AUTH_TYPE: ${RA_REGISTRY_AUTH_TYPE:-basic}
+      RA_REGISTRY_HTPASSWD: ${RA_REGISTRY_HTPASSWD:-/app/access/.htpasswd}
+      RA_REGISTRY_LOGIN: ${RA_REGISTRY_LOGIN:-admin}
+      RA_REGISTRY_PASSWORD: ${RA_REGISTRY_PASSWORD}
+    volumes:
+      - registry-admin-data:/app/data
+      - distribution-access:/app/access
+    networks:
+      - distribution-network
+    ports:
+      - 8080:80
+volumes:
+  registry-admin-data:
+    name: registry-admin-data
+  distribution-access:
+    external: true
+networks:
+  distribution-network:
+    external: true

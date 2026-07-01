@@ -1,0 +1,13 @@
+services:
+  registry-admin:
+    environment:
+      RA_REGISTRY_AUTH_TYPE: ${RA_REGISTRY_AUTH_TYPE:-basic}
+      RA_REGISTRY_HTPASSWD: ${RA_REGISTRY_HTPASSWD:-/app/access/.htpasswd}
+      RA_REGISTRY_LOGIN: ${RA_REGISTRY_LOGIN:-admin}
+      RA_REGISTRY_PASSWORD: ${RA_REGISTRY_PASSWORD}
+    volumes:
+      - distribution-access:/app/access
+
+volumes:
+  distribution-access:
+    external: true

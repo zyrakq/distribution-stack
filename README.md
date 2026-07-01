@@ -4,7 +4,7 @@ Docker Distribution (Registry) with web interface, SSO, and SSL automation.
 
 ## 🧩 Components
 
-### 🐳 [Docker Distribution](src/distribution/)
+### 🐳 [Docker Distribution](app/)
 
 Docker Registry v2.8.3 with modular configuration system supporting multiple authentication methods and environments.
 
@@ -26,7 +26,7 @@ Private CA with local DNS for development environments.
 
 ## 🚀 Deployment Order
 
-1. **First**: Deploy [distribution](src/distribution/)
+1. **First**: Deploy [distribution](app/)
 2. **Second**: Deploy [registry-admin](src/clients/registry-admin/)
 
 ⚠️ **Note**: With OIDC, distribution restarts ~20 seconds during initial startup for certificate generation.

@@ -1,0 +1,23 @@
+services:
+  registry-admin:
+    environment:
+      RA_REGISTRY_AUTH_TYPE: ${RA_REGISTRY_AUTH_TYPE:-token}
+      RA_REGISTRY_ISSUER: ${RA_REGISTRY_ISSUER}
+      RA_REGISTRY_SERVICE: ${RA_REGISTRY_SERVICE}
+      # cert
+      RA_REGISTRY_CERTS_CERT_PATH: ${RA_REGISTRY_CERTS_CERT_PATH:-/app/certs}
+      RA_REGISTRY_CERTS_KEY_PATH: ${RA_REGISTRY_CERTS_KEY_PATH:-/app/certs/cert.key}
+      RA_REGISTRY_CERTS_PUBLIC_KEY_PATH: ${RA_REGISTRY_CERTS_PUBLIC_KEY_PATH:-/app/certs/cert.pub}
+      RA_REGISTRY_CERTS_CA_ROOT_PATH: ${RA_REGISTRY_CERTS_CA_ROOT_PATH:-/app/certs/cert.crt}
+      RA_REGISTRY_CERTS_IP: ${RA_REGISTRY_CERTS_IP:-}
+      RA_REGISTRY_CERTS_FQDN: ${RA_REGISTRY_CERTS_FQDN}
+      RA_REGISTRY_HTTPS_INSECURE: ${RA_REGISTRY_HTTPS_INSECURE:-false}
+      RA_REGISTRY_CERTS_CERT_HTTPS: ${RA_REGISTRY_CERTS_CERT_HTTPS}
+    volumes:
+      - distribution-oidc-certs:/app/certs
+
+
+volumes:
+  distribution-oidc-certs:
+    name: ${DISTRIBUTION_CERTS:-distribution-oidc-certs}
+    external: true

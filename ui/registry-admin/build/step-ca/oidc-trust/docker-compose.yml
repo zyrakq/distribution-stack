@@ -1,0 +1,61 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: ${LOG_MAX_SIZE:-10m}
+    max-file: ${LOG_MAX_FILE:-3}
+    compress: ${LOG_COMPRESS:-true}
+services:
+  registry-admin:
+    container_name: registry-admin
+    image: ${IMAGE:-localhost/registry-admin:latest}
+    restart: unless-stopped
+    logging: *default-logging
+    # command: sleep infinity
+    environment:
+      APP_UID: ${APP_UID:-1001}
+      RA_DEBUG: ${RA_DEBUG:-false}
+      RA_REGISTRY_HOSTNAME: ${RA_REGISTRY_HOSTNAME:-0.0.0.0}
+      RA_REGISTRY_HOST: ${RA_REGISTRY_HOST}
+      RA_REGISTRY_PORT: ${RA_REGISTRY_PORT}
+      RA_AUTH_TOKEN_SECRET: ${RA_AUTH_TOKEN_SECRET}
+      RA_STORE_DB_TYPE: ${RA_STORE_DB_TYPE:-embed}
+      RA_STORE_ADMIN_PASSWORD: ${RA_STORE_ADMIN_PASSWORD}
+      RA_STORE_EMBED_DB_PATH: ${RA_STORE_EMBED_DB_PATH:-/app/data/store.db}
+      VIRTUAL_PORT: ${VIRTUAL_PORT:-80}
+      VIRTUAL_HOST: ${VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${LETSENCRYPT_HOST}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+      RA_REGISTRY_AUTH_TYPE: ${RA_REGISTRY_AUTH_TYPE:-token}
+      RA_REGISTRY_ISSUER: ${RA_REGISTRY_ISSUER}
+      RA_REGISTRY_SERVICE: ${RA_REGISTRY_SERVICE}
+      # cert
+      RA_REGISTRY_CERTS_CERT_PATH: ${RA_REGISTRY_CERTS_CERT_PATH:-/app/certs}
+      RA_REGISTRY_CERTS_KEY_PATH: ${RA_REGISTRY_CERTS_KEY_PATH:-/app/certs/cert.key}
+      RA_REGISTRY_CERTS_PUBLIC_KEY_PATH: ${RA_REGISTRY_CERTS_PUBLIC_KEY_PATH:-/app/certs/cert.pub}
+      RA_REGISTRY_CERTS_CA_ROOT_PATH: ${RA_REGISTRY_CERTS_CA_ROOT_PATH:-/app/certs/cert.crt}
+      RA_REGISTRY_CERTS_IP: ${RA_REGISTRY_CERTS_IP:-}
+      RA_REGISTRY_CERTS_FQDN: ${RA_REGISTRY_CERTS_FQDN}
+      RA_REGISTRY_HTTPS_INSECURE: ${RA_REGISTRY_HTTPS_INSECURE:-false}
+      RA_REGISTRY_CERTS_CERT_HTTPS: ${RA_REGISTRY_CERTS_CERT_HTTPS}
+      STEP_CA_TRUST: ${STEP_CA_TRUST:-true}
+      STEP_CA_TRUST_RESTART: ${STEP_CA_TRUST_RESTART:-true}
+      REQUESTS_CA_BUNDLE: ${REQUESTS_CA_BUNDLE:-/etc/ssl/certs/ca-certificates.crt}
+      SSL_CERT_FILE: ${SSL_CERT_FILE:-/etc/ssl/certs/ca-certificates.crt}
+    volumes:
+      - registry-admin-data:/app/data
+      - distribution-oidc-certs:/app/certs
+    networks:
+      - distribution-network
+      - step-ca-network
+volumes:
+  registry-admin-data:
+    name: registry-admin-data
+  distribution-oidc-certs:
+    name: ${DISTRIBUTION_CERTS:-distribution-oidc-certs}
+    external: true
+networks:
+  distribution-network:
+    external: true
+  step-ca-network:
+    name: step-ca-network
+    external: true

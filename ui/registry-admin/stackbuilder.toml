@@ -1,0 +1,23 @@
+[paths]
+environments_path = "./environments"
+extensions_dirs = ["extensions/auth", "extensions"]
+
+[build]
+extensions = ["htpasswd", "oidc", "step-ca-trust"]
+skip_base_generation = true
+
+[build.combos]
+htpasswd-trust = ["htpasswd", "step-ca-trust"]
+oidc-trust = ["oidc", "step-ca-trust"]
+
+[build.environments]
+available = ["forwarding", "letsencrypt", "step-ca"]
+
+[build.environments.forwarding]
+extensions = ["htpasswd", "oidc"]
+
+[build.environments.letsencrypt]
+extensions = ["htpasswd", "oidc"]
+
+[build.environments.step-ca]
+combos = ["htpasswd-trust", "oidc-trust"]
