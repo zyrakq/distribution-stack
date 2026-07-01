@@ -4,11 +4,11 @@ Docker Distribution (Registry) with web interface, SSO, and SSL automation.
 
 ## 🧩 Components
 
-### 🐳 [Docker Distribution](app/)
+### 🐳 [Docker Distribution](server/)
 
 Docker Registry v2.8.3 with modular configuration system supporting multiple authentication methods and environments.
 
-### 🎛️ [Registry Admin](src/clients/registry-admin/)
+### 🎛️ [Registry Admin](ui/registry-admin/)
 
 Web interface and OIDC/SSO provider for Docker Distribution. Provides user management and image catalog browsing.
 
@@ -16,18 +16,18 @@ Web interface and OIDC/SSO provider for Docker Distribution. Provides user manag
 
 ### 🔐 SSL Automation
 
-#### [🔒 Let's Encrypt Manager](src/ssl-automation/letsencrypt-manager)
+#### [🔒 Let's Encrypt Manager](modules/ssl-automation/letsencrypt-manager)
 
 Automatic SSL certificates from Let's Encrypt for production deployments.
 
-#### [🏠 Step CA Manager](src/ssl-automation/step-ca-manager)
+#### [🏠 Step CA Manager](modules/ssl-automation/step-ca-manager)
 
 Private CA with local DNS for development environments.
 
 ## 🚀 Deployment Order
 
-1. **First**: Deploy [distribution](app/)
-2. **Second**: Deploy [registry-admin](src/clients/registry-admin/)
+1. **First**: Deploy [distribution](server/)
+2. **Second**: Deploy [registry-admin](ui/registry-admin/)
 
 ⚠️ **Note**: With OIDC, distribution restarts ~20 seconds during initial startup for certificate generation.
 
